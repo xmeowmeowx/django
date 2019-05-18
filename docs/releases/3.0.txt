@@ -47,6 +47,10 @@ Minor features
 * Added support for the ``admin_order_field`` attribute on properties in
   :attr:`.ModelAdmin.list_display`.
 
+* The new :meth:`ModelAdmin.get_inlines()
+  <django.contrib.admin.ModelAdmin.get_inlines>` method allows specifying the
+  inlines based on the request or model instance.
+
 :mod:`django.contrib.admindocs`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -70,6 +74,9 @@ Minor features
 
 * Added the :class:`~django.contrib.gis.db.models.functions.GeometryDistance`
   function, supported on PostGIS.
+
+* Added support for the ``furlong`` unit in
+  :class:`~django.contrib.gis.measure.Distance`.
 
 :mod:`django.contrib.messages`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,7 +116,10 @@ Minor features
 :mod:`django.contrib.syndication`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ...
+* Added the ``language`` class attribute to the
+  :class:`django.contrib.syndication.views.Feed` to customize a feed language.
+  The default value is :func:`~django.utils.translation.get_language()` instead
+  of setting:`LANGUAGE_CODE`.
 
 Cache
 ~~~~~
@@ -168,6 +178,14 @@ Management Commands
 * :option:`showmigrations --list` now shows the applied datetimes when
   ``--verbosity`` is 2 and above.
 
+* On PostgreSQL, :djadmin:`dbshell` now supports client-side TLS certificates.
+
+* :djadmin:`inspectdb` now introspects :class:`~django.db.models.OneToOneField`
+  when a foreign key has a unique or primary key constraint.
+
+* The new :option:`--skip-checks` option skips running system checks prior to
+  running the command.
+
 Migrations
 ~~~~~~~~~~
 
@@ -189,11 +207,18 @@ Models
   :class:`~django.db.models.functions.Trunc` database functions determines the
   treatment of nonexistent and ambiguous datetimes.
 
+* ``connection.queries`` now shows ``COPY … TO`` statements on PostgreSQL.
+
+* :class:`~django.db.models.FilePathField` now accepts a callable ``path``.
+
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Allowed :class:`~django.http.HttpResponse` to be initialized with
   :class:`memoryview` content.
+
+* For use in, for example, Django templates, :attr:`.HttpRequest.headers` now
+  allows look ups using underscores (e.g. ``user_agent``) in place of hyphens.
 
 Serialization
 ~~~~~~~~~~~~~
@@ -220,6 +245,17 @@ Tests
   exception occurs, the test client will return a 500 response with the
   attribute :attr:`~django.test.Response.exc_info`, a tuple providing
   information of the exception that occurred.
+
+* Tests and test cases to run can be selected by test name pattern using the
+  new :option:`test -k` option.
+
+* HTML comparison, as used by
+  :meth:`~django.test.SimpleTestCase.assertHTMLEqual`, now treats text, character
+  references, and entity references that refer to the same character as
+  equivalent.
+
+* Django test runner now supports headless mode for selenium tests on supported
+  browsers. Add the ``--headless`` option to enable this mode.
 
 URLs
 ~~~~
@@ -339,6 +375,19 @@ Miscellaneous
   the session and :func:`django.contrib.auth.logout` no longer preserves the
   session's language after logout.
 
+* :func:`django.utils.html.escape` now uses :func:`html.escape` to escape HTML.
+  This converts ``'`` to ``&#x27;`` instead of the previous equivalent decimal
+  code ``&#39;``.
+
+* The ``django-admin test -k`` option now works as the :option:`unittest
+  -k<unittest.-k>` option rather than as a shortcut for ``--keepdb``.
+
+* Support for ``pywatchman`` < 1.2.0 is removed.
+
+* HTML rendered by :class:`~django.forms.SelectDateWidget` for required fields
+  now have the ``placeholder`` attribute, which mainly may require some
+  adjustments in tests that compare HTML.
+
 .. _deprecated-features-3.0:
 
 Features deprecated in 3.0
@@ -376,6 +425,10 @@ Miscellaneous
 
 * ``alias=None`` is added to the signature of
   :meth:`.Expression.get_group_by_cols`.
+
+* ``django.utils.text.unescape_entities()`` is deprecated in favor of
+  :func:`html.unescape`. Note that unlike ``unescape_entities()``,
+  ``html.unescape()`` evaluates lazy strings immediately.
 
 .. _removed-features-3.0:
 

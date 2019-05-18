@@ -888,7 +888,8 @@ If you're using Linux or MacOS and install both `pywatchman`_ and the
 `Watchman`_ service, kernel signals will be used to autoreload the server
 (rather than polling file modification timestamps each second). This offers
 better performance on large projects, reduced response time after code changes,
-more robust change detection, and a reduction in power usage.
+more robust change detection, and a reduction in power usage. Django supports
+``pywatchman`` 1.2.0 and higher.
 
 .. admonition:: Large directories with many files may cause performance issues
 
@@ -896,6 +897,11 @@ more robust change detection, and a reduction in power usage.
     directories like ``node_modules``, it's advisable to ignore this directory
     for optimal performance. See the `watchman documentation`_ for information
     on how to do this.
+
+.. admonition:: Watchman timeout
+
+    The default timeout of ``Watchman`` client is 5 seconds. You can change it
+    by setting the ``DJANGO_WATCHMAN_TIMEOUT`` environment variable.
 
 .. _Watchman: https://facebook.github.io/watchman/
 .. _pywatchman: https://pypi.org/project/pywatchman/
@@ -1355,7 +1361,7 @@ The ``test`` command receives options on behalf of the specified
 :option:`--testrunner`. These are the options of the default test runner:
 :class:`~django.test.runner.DiscoverRunner`.
 
-.. django-admin-option:: --keepdb, -k
+.. django-admin-option:: --keepdb
 
 Preserves the test database between test runs. This has the advantage of
 skipping both the create and destroy actions which can greatly decrease the
@@ -1403,7 +1409,7 @@ correctly:
 
 .. code-block:: console
 
-    $ pip install tblib
+    $ python -m pip install tblib
 
 This feature isn't available on Windows. It doesn't work with the Oracle
 database backend either.
@@ -1432,6 +1438,18 @@ May be specified multiple times and combined with :option:`test --exclude-tag`.
 
 Excludes tests :ref:`marked with the specified tags <topics-tagging-tests>`.
 May be specified multiple times and combined with :option:`test --tag`.
+
+.. django-admin-option:: -k TEST_NAME_PATTERNS
+
+.. versionadded:: 3.0
+
+Runs test methods and classes matching test name patterns, in the same way as
+:option:`unittest's -k option<unittest.-k>`. Can be specified multiple times.
+
+.. admonition:: Python 3.7 and later
+
+    This feature is only available for Python 3.7 and later.
+
 
 ``testserver``
 --------------
@@ -1719,6 +1737,19 @@ Forces colorization of the command output if it would otherwise be disabled
 as discussed in :ref:`syntax-coloring`. For example, you may want to pipe
 colored output to another command.
 
+.. django-admin-option:: --skip-checks
+
+.. versionadded:: 3.0
+
+Skips running system checks prior to running the command. This option is only
+available if the
+:attr:`~django.core.management.BaseCommand.requires_system_checks` command
+attribute is set to ``True``.
+
+Example usage::
+
+    django-admin migrate --skip-checks
+
 Extra niceties
 ==============
 
@@ -1909,5 +1940,5 @@ Output redirection
 Note that you can redirect standard output and error streams as all commands
 support the ``stdout`` and ``stderr`` options. For example, you could write::
 
-    with open('/path/to/command_output') as f:
+    with open('/path/to/command_output', 'w') as f:
         management.call_command('dumpdata', stdout=f)

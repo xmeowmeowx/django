@@ -797,6 +797,8 @@ class ForeignKey(ForeignObject):
             # the to_field during FK construction. It won't be guaranteed to
             # be correct until contribute_to_class is called. Refs #12190.
             to_field = to_field or (to._meta.pk and to._meta.pk.name)
+        if not callable(on_delete):
+            raise TypeError('on_delete must be callable.')
 
         kwargs['rel'] = self.rel_class(
             self, to, to_field,
@@ -938,6 +940,9 @@ class ForeignKey(ForeignObject):
 
     def get_db_prep_value(self, value, connection, prepared=False):
         return self.target_field.get_db_prep_value(value, connection, prepared)
+
+    def get_prep_value(self, value):
+        return self.target_field.get_prep_value(value)
 
     def contribute_to_related_class(self, cls, related):
         super().contribute_to_related_class(cls, related)

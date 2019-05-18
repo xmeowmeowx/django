@@ -236,7 +236,7 @@ class UserCreationFormTest(TestDataMixin, TestCase):
         form = UserCreationForm()
         self.assertEqual(
             form.fields['password1'].help_text,
-            '<ul><li>Your password can&#39;t be too similar to your other personal information.</li></ul>'
+            '<ul><li>Your password can&#x27;t be too similar to your other personal information.</li></ul>'
         )
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=[
@@ -881,7 +881,7 @@ class PasswordResetFormTest(TestDataMixin, TestCase):
 
     def test_save_html_email_template_name(self):
         """
-        Test the PasswordResetFOrm.save() method with html_email_template_name
+        Test the PasswordResetForm.save() method with html_email_template_name
         parameter specified.
         Test to ensure that a multipart email is sent with both text/plain
         and text/html parts.

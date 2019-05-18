@@ -70,6 +70,10 @@ class BasicExpressionsTests(TestCase):
             ['<Company: Example Inc.>', '<Company: Foobar Ltd.>', '<Company: Test GmbH>'],
         )
 
+    def test_annotate_values_count(self):
+        companies = Company.objects.annotate(foo=RawSQL('%s', ['value']))
+        self.assertEqual(companies.count(), 3)
+
     @unittest.skipIf(connection.vendor == 'oracle', "Oracle doesn't support using boolean type in SELECT")
     def test_filtering_on_annotate_that_uses_q(self):
         self.assertEqual(
@@ -379,6 +383,29 @@ class BasicExpressionsTests(TestCase):
             Exists(Company.objects.filter(ceo=OuterRef('pk'))).desc()
         )
         self.assertSequenceEqual(mustermanns_by_seniority, [self.max, mary])
+
+    def test_order_by_multiline_sql(self):
+        raw_order_by = (
+            RawSQL('''
+                CASE WHEN num_employees > 1000
+                     THEN num_chairs
+                     ELSE 0 END
+            ''', []).desc(),
+            RawSQL('''
+                CASE WHEN num_chairs > 1
+                     THEN 1
+                     ELSE 0 END
+            ''', []).asc()
+        )
+        for qs in (
+            Company.objects.all(),
+            Company.objects.distinct(),
+        ):
+            with self.subTest(qs=qs):
+                self.assertSequenceEqual(
+                    qs.order_by(*raw_order_by),
+                    [self.example_inc, self.gmbh, self.foobar_ltd],
+                )
 
     def test_outerref(self):
         inner = Company.objects.filter(point_of_contact=OuterRef('pk'))

@@ -732,7 +732,7 @@ class Model(metaclass=ModelBase):
                                  % ', '.join(non_model_fields))
 
         # If saving to the same database, and this model is deferred, then
-        # automatically do a "update_fields" save on the loaded fields.
+        # automatically do an "update_fields" save on the loaded fields.
         elif not force_insert and deferred_fields and using == self._state.db:
             field_names = set()
             for field in self._meta.concrete_fields:
@@ -1576,9 +1576,11 @@ class Model(metaclass=ModelBase):
 
         # In order to avoid hitting the relation tree prematurely, we use our
         # own fields_map instead of using get_field()
-        forward_fields_map = {
-            field.name: field for field in cls._meta._get_fields(reverse=False)
-        }
+        forward_fields_map = {}
+        for field in cls._meta._get_fields(reverse=False):
+            forward_fields_map[field.name] = field
+            if hasattr(field, 'attname'):
+                forward_fields_map[field.attname] = field
 
         errors = []
         for field_name in fields:
