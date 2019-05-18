@@ -8,9 +8,8 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 
 from .models import (
-    Article, Author, Book, Category, Child, City, District, First, Parent,
-    Record, Relation, Reporter, School, Student, Third, ToFieldBook,
-    ToFieldChild,
+    Article, Category, Child, City, District, First, Parent, Record, Relation,
+    Reporter, School, Student, Third, ToFieldChild,
 )
 
 
@@ -522,24 +521,6 @@ class ManyToOneTests(TestCase):
         c = Child(parent_id=p.id)
         self.assertIsNot(c.parent, p)
         self.assertEqual(c.parent, p)
-
-    def test_save_nullable_parent_then_child(self):
-        author = Author()
-        book = Book(author=author)
-        author.save()
-        book.save()
-        book.refresh_from_db()
-        self.assertEqual(book.author, author)
-
-    def test_save_nullable_parent_then_child_to_field(self):
-        author_id = "jeff"
-        author = Author(name=author_id)
-        book = ToFieldBook(author=author)
-        author.save()
-        book.save()
-        book.refresh_from_db()
-        self.assertEqual(book.author, author)
-        self.assertEqual(book.author_id, author_id)
 
     def test_fk_to_bigautofield(self):
         ch = City.objects.create(name='Chicago')
